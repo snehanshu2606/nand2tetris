@@ -1,0 +1,34 @@
+// RAM64: 8 RAM8 chips, addressed by a 6-bit address.
+//
+// Address decomposition:
+//   address[5..0] = [ b5 b4 b3 | b2 b1 b0 ]
+//                     chip sel   register sel
+//   address[3..5] -> which RAM8 (0-7)
+//   address[0..2] -> which register inside that RAM8 (0-7)
+//
+// Example: address 37 = 100101 -> RAM8 #4, register 5
+
+CHIP RAM64 {
+    IN  in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    // High 3 bits pick the RAM8 chip to load
+    DMux8Way(in=load, sel=address[3..5],
+             a=l0, b=l1, c=l2, d=l3, e=l4, f=l5, g=l6, h=l7);
+
+    // Low 3 bits pick the register inside the chip.
+    // Every RAM8 sees the same low bits; only one gets load=1.
+    RAM8(in=in, load=l0, address=address[0..2], out=r0);
+    RAM8(in=in, load=l1, address=address[0..2], out=r1);
+    RAM8(in=in, load=l2, address=address[0..2], out=r2);
+    RAM8(in=in, load=l3, address=address[0..2], out=r3);
+    RAM8(in=in, load=l4, address=address[0..2], out=r4);
+    RAM8(in=in, load=l5, address=address[0..2], out=r5);
+    RAM8(in=in, load=l6, address=address[0..2], out=r6);
+    RAM8(in=in, load=l7, address=address[0..2], out=r7);
+
+    // High 3 bits also pick which chip's output to read
+    Mux8Way16(a=r0, b=r1, c=r2, d=r3, e=r4, f=r5, g=r6, h=r7,
+              sel=address[3..5], out=out);
+}
