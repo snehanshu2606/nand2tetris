@@ -1,0 +1,10 @@
+// 2-way Mux: out = a if sel=0, b if sel=1
+CHIP Mux {
+    IN a, b, sel;
+    OUT out;
+    PARTS:
+    Not(in=sel, out=nsel);
+    And(a=a, b=nsel, out=w1);
+    And(a=b, b=sel, out=w2);
+    Or(a=w1, b=w2, out=out);
+}

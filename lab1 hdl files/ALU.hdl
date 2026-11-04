@@ -1,0 +1,26 @@
+// Hack ALU. Pre-process x, y (zero / negate), compute f (And / Add),
+// post-process (negate), then derive zr and ng flags.
+CHIP ALU {
+    IN  x[16], y[16], zx, nx, zy, ny, f, no;
+    OUT out[16], zr, ng;
+    PARTS:
+    // x pre-processing
+    Mux16(a=x,  b=false, sel=zx, out=x1);
+    Not16(in=x1, out=notx1);
+    Mux16(a=x1, b=notx1, sel=nx, out=x2);
+    // y pre-processing
+    Mux16(a=y,  b=false, sel=zy, out=y1);
+    Not16(in=y1, out=noty1);
+    Mux16(a=y1, b=noty1, sel=ny, out=y2);
+    // function
+    And16(a=x2, b=y2, out=xAndY);
+    Add16(a=x2, b=y2, out=xPlusY);
+    Mux16(a=xAndY, b=xPlusY, sel=f, out=fout);
+    // output negation + flags
+    Not16(in=fout, out=notfout);
+    Mux16(a=fout, b=notfout, sel=no, out=out, out[15]=ng, out[0..7]=lo, out[8..15]=hi);
+    Or8Way(in=lo, out=orLo);
+    Or8Way(in=hi, out=orHi);
+    Or(a=orLo, b=orHi, out=nonzero);
+    Not(in=nonzero, out=zr);
+}
