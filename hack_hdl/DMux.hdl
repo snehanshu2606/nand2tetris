@@ -1,0 +1,9 @@
+// DMux: routes `in` to a (sel=0) or b (sel=1), other output = 0
+CHIP DMux {
+    IN in, sel;
+    OUT a, b;
+    PARTS:
+    Not(in=sel, out=nsel);
+    And(a=in, b=nsel, out=a);
+    And(a=in, b=sel, out=b);
+}
